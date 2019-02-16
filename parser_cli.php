@@ -4,7 +4,6 @@ require_once("./Scanner.php");
 require_once("./IScanner.php");
 require_once("./parser.php");
 
-// TODO: presunout toto do parseru, $s->parseWords(); bude volat parser
 //***************************************************************************
 //$fh = fopen('php://stdin', 'r');
 $fh = fopen("test.txt", "r");
@@ -16,7 +15,6 @@ while ($line = fgets($fh)) {
     if (strlen($line)==0)
         continue;
     $word = explode(" ", trim($line));
-    print_r($word);
     $token = array();
     foreach ($word as $input) {
         $s = new Scanner($input);
@@ -25,6 +23,6 @@ while ($line = fgets($fh)) {
     }
 
     $parsed = new Parser($inputInput, $word);
-    echo $parsed->instruction();
+    $parsed->instruction();
 }
 //***************************************************************************
