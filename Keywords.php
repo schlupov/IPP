@@ -36,15 +36,6 @@ class Keywords {
     public const EXIT = "EXIT";
     public const DPRINT = "DPRINT";
     public const BREAK = "BREAK";
-    public const GF = "GF";
-    public const TF = "TF";
-    public const LF = "LF";
-    public const true = "true";
-    public const false = "false";
-    public const nil = "nil";
-    public const int = "int";
-    public const string = "string";
-    public const end = "end";
 
     public static function getConstants() {
         $oClass = new ReflectionClass(__CLASS__);
@@ -61,6 +52,7 @@ class SpecialWords {
     public const nil = "nil";
     public const int = "int";
     public const string = "string";
+    public const bool = "bool";
     public const end = "end";
     public const while = "while";
 

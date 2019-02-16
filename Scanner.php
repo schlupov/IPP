@@ -12,13 +12,6 @@ class Scanner implements IScanner {
         $this -> stdin = $stdin;
     }
 
-    public function readFirstLine() {
-        if(trim($this->stdin)!=".ippcode19") {
-            fwrite(STDERR, "chybna nebo chybejici hlavicka ve zdrojovem kodu zapsanem v IPPcode19.\n");
-            exit (21);
-        }
-    }
-
     public function parseWords() {
         $token = array();
         $word = array();
@@ -33,10 +26,6 @@ class Scanner implements IScanner {
             array_push($word, $this->stdin);
         }
 
-        $keyword = new IsKeyword($word, $token);
-
-        $token = $keyword->getKeywords();
-
         $token["DIGIT"] = array();
         $token["STRING"] = array();
         for($i = 0; $i < count($word); $i++) {
@@ -49,7 +38,12 @@ class Scanner implements IScanner {
                     continue;
                 }
                 elseif ($this->specialWords($word[$i])) {
-                    $token["KEYWORD"][] = $word[$i];
+                    $token["SPECIAL"][] = $word[$i];
+                    continue;
+                }
+                elseif ($this->checkNumbers($word[$i])) {
+                    $withoutBackSlash = $this->checkNumbers($word[$i]);
+                    $token["ESCAPE"][] = $withoutBackSlash;
                     continue;
                 }
                 array_push($token["STRING"],$word[$i]);
@@ -65,6 +59,28 @@ class Scanner implements IScanner {
         return $token;
     }
 
+    private function checkNumbers($oneWord) {
+        $digit = true;
+        $backslash = false;
+        preg_match_all('!\d+!', $oneWord, $matches);
+        foreach ($matches as $key) {
+            if (empty($key)) {
+                unset($matches);
+                $digit = false;
+            }
+        }
+        if (strpos($oneWord, '\\') !== FALSE) {
+            $backslash = true;
+        }
+        if (($digit == false) and ($backslash == false) == false) {
+            fwrite(STDERR, "chyba.\n");
+            exit (23);
+        }
+        elseif (($digit == true) and ($backslash == false) == false) {
+            return $oneWord;
+        }
+    }
+
     private function parse($word) {
         $withoutAt =array();
         if (strpos($word, '@') == true) {
@@ -73,12 +89,6 @@ class Scanner implements IScanner {
         }
         else {
             $this->flag = false;
-            //muze byt \032obsahuje\032
-            /*if ($this->keyWords($word) == false) {
-                echo $word;
-                fwrite(STDERR, "lexikalni nebo syntakticka chyba zdrojoveho kodu zapsaneho v IPPcode19.\n");
-                exit (23);
-            }*/
         }
         return $withoutAt;
     }
@@ -109,25 +119,17 @@ class Scanner implements IScanner {
     }
 }
 
-// TODO: presunout toto do parseru
-//***************************************************************************
-//$fh = fopen('php://stdin', 'r');
-$fh = fopen("test.txt", "r");
-$firstLineToLower = strtolower(fgets($fh));
-$firstLine = new Scanner($firstLineToLower);
-$firstLine->readFirstLine();
-while ($line = fgets($fh)) {
-    if (trim($line) == "exit()") {
-        exit(0);
+function removeComment($line){
+    if (strpos($line, "#")!==false) {
+        return substr($line, 0, strpos($line, "#"));
     }
-    $line = preg_replace('![\s\t]+!', ' ', $line);
-    $word = explode(" ", trim($line));
-    foreach ($word as $input) {
-        $s = new Scanner($input);
-        $navrat =  $s->parseWords();
-        print_r($navrat);
-    }
-    if (strlen($line)==0)
-        continue;
+    return $line;
 }
-//***************************************************************************
+
+function readFirstLine($line){
+    $firstLine=strtolower(fgets($line));
+    if(trim($firstLine)!=".ippcode19") {
+        fwrite(STDERR, "chybna nebo chybejici hlavicka ve zdrojovem kodu zapsanem v IPPcode19.\n");
+        exit (21);
+    }
+}
