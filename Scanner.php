@@ -55,7 +55,6 @@ class Scanner implements IScanner {
                 unset($token[$key]);
             }
         }
-
         return $token;
     }
 
@@ -73,7 +72,7 @@ class Scanner implements IScanner {
             $backslash = true;
         }
         if (($digit == false) and ($backslash == false) == false) {
-            fwrite(STDERR, "chyba.\n");
+            fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
             exit (23);
         }
         elseif (($digit == true) and ($backslash == false) == false) {

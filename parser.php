@@ -56,31 +56,31 @@ class Parser {
             case Keywords::CALL:
                 return new CALL($this->line);
             case Keywords::RETURN:
-                return new ReturnInstruction($this->line);
+                return new RETURNInstruction($this->line);
             case Keywords::PUSHS:
                 return new PUSHS($this->line);
             case Keywords::POPS:
                 return new POPS($this->line);
-            case "ADD":
+            case Keywords::ADD:
                 return new ADD($this->line);
-            case "SUB":
+            case Keywords::SUB:
                 return new SUB($this->line);
-            case "MUL":
+            case Keywords::MUL:
                 return new MUL($this->line);
-            case "IDIV":
+            case Keywords::IDIV:
                 return new IDIV($this->line);
-            case "LT":
+            case Keywords::LT:
                 return new LT($this->line);
-            case "GT":
+            case Keywords::GT:
                 return new GT($this->line);
-            case "EQ":
+            case Keywords::EQ:
                 return new EQ($this->line);
-            case "AND":
+            case Keywords::AND:
                 return new ANDInstruction($this->line);
-            case "OR":
+            case Keywords::OR:
                 return new ORInstruction($this->line);
-            case "NOT":
-                return new NOTInstruction($this->line);
+            case Keywords::NOT:
+                return new NOT($this->line);
             case "INT2CHAR":
                 return new INT2CHAR($this->line);
             case "STRI2INT":

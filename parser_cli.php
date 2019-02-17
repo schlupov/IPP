@@ -10,7 +10,7 @@ $fh = fopen("test.txt", "r");
 readFirstLine($fh);
 while ($line = fgets($fh)) {
     $inputInput = array();
-    $line = trim(removeComment($line));
+    if ($line[0] == "#") {$line = trim(removeComment($line));}
     $line = preg_replace('![\s\t]+!', ' ', $line);
     if (strlen($line)==0)
         continue;
