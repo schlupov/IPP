@@ -16,7 +16,6 @@ class CREATEFRAME {
         return false;
     }
 
-
     function __destruct() {
     }
 }

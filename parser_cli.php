@@ -21,7 +21,6 @@ while ($line = fgets($fh)) {
         $token =  $s->parseWords();
         array_push($inputInput, $token);
     }
-
     $parsed = new Parser($inputInput, $word);
     $parsed->instruction();
 }

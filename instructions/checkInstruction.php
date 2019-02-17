@@ -16,34 +16,27 @@ class checkInstruction {
             if (count($withoutAt) < 2) {
                 return false;
             }
-            foreach ($withoutAt as $var) {
-                if (is_numeric($var)) {
-                    return ($withoutAt[0] == "int") && $var;
-                }
-                elseif (($var == "true") || ($var == "false")) {
-                    return ($withoutAt[0] == "bool") && $var;
-                }
-                elseif ($var == "nil") {
-                    return ($withoutAt[0] == "nil") && $var;
-                }
-                elseif ($var == "string") {
-                    $this->checkString($withoutAt[1]);
-                    return $var;
-                }
+            if ($this->checkVariable($arg, $withoutAt, $flag)) {
+                return true;
             }
         }
-        $variable = $this->checkVariable($arg, $withoutAt, $flag);
-        return $variable;
+        return false;
     }
 
     public function checkVariable($arg, $withoutAt, $flag) {
         $identifier = strpos($arg, "@")!==false ? substr($arg, strpos($arg, "@")+1) : "error";
         if ((preg_match("/^([a-zA-Z]|-|[_$&%*])([a-zA-Z]|-|[_$&%*]|[0-9]+)*$/",$identifier)) && ($identifier != "error")){
-            if ($flag == true) {
+            if ($flag === true) {
                 return ($withoutAt[0] == "LF" || $withoutAt[0] == "TF" || $withoutAt[0] == "GF") && $identifier;
             }
+            elseif ($flag === false) {
+                if (($this->checkConstant($withoutAt)) || ($withoutAt[0] == "LF" || $withoutAt[0] == "TF" || $withoutAt[0] == "GF")){
+                    return ($withoutAt[0] == "LF" || $withoutAt[0] == "TF" || $withoutAt[0] == "GF"
+                            || $withoutAt[0] == "int" || $withoutAt[0] == "string" || $withoutAt[0] == "bool"
+                            || $withoutAt[0] == "nil") && $identifier;
+                }
+            }
         }
-        return false;
     }
 
     public function checkString($var) {
@@ -52,5 +45,28 @@ class checkInstruction {
         }
         fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
         exit (23);
+    }
+
+    public function checkLabel($arg) {
+        $identifier = strpos($arg, "@") === true ? "error":$arg;
+        if ((preg_match("/^([a-zA-Z]|-|[_$&%*])([a-zA-Z]|-|[_$&%*]|[0-9]+)*$/",$identifier)) && ($identifier != "error")){
+            return true;
+        }
+        return false;
+    }
+
+    public function checkConstant ($withoutAt) {
+        foreach ($withoutAt as $var) {
+            if (is_numeric($var)) {
+                return ($withoutAt[0] == "int") && $var;
+            } elseif (($var == "true") || ($var == "false")) {
+                return ($withoutAt[0] == "bool") && $var;
+            } elseif ($var == "nil") {
+                return ($withoutAt[0] == "nil") && $var;
+            } elseif ($var == "string") {
+                $this->checkString($withoutAt[1]);
+                return true;
+            }
+        }
     }
 }

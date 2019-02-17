@@ -2,7 +2,7 @@
 
 require_once("./instructions/checkInstruction.php");
 
-class DEFVAR {
+class RETURNInstruction {
 
     public function __construct($line) {
         $this->line = $line;
@@ -10,9 +10,7 @@ class DEFVAR {
 
     public function checkLine() {
         $check = new checkInstruction();
-        $check->checkNumberOfParameters($this->line, 1);
-        $arg1 = $this->line[1];
-        if (($check->arguments($arg1, true))) {
+        if ($check->checkNumberOfParameters($this->line, 0)) {
             return true;
         }
         return false;
