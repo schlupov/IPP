@@ -97,20 +97,22 @@ class Parser {
                 return new GETCHAR($this->line);
             case Keywords::SETCHAR:
                 return new SETCHAR($this->line);
-            case "TYPE":
+            case Keywords::TYPE:
                 return new TYPE($this->line);
-            case "LABEL":
+            case Keywords::LABEL:
                 return new LABEL($this->line);
-            case "JUMP":
+            case Keywords::JUMP:
                 return new JUMP($this->line);
-            case "JUMPIFEQ":
+            case Keywords::JUMPIFEQ:
                 return new JUMPIFEQ($this->line);
-            case "JUMPIFNEQ":
-                return new JUMPIFNEQ($this->line);
-            case "DPRINT":
-                return new DPRINT($this->line);
-            case "BREAK":
-                return new BREAKInstruction($this->line);
+            case Keywords::JUMPIFNEQ:
+                return new JUMPIFEQ($this->line);
+            case Keywords::EXIT:
+                return new EXITInstruction($this->line);
+            case Keywords::DPRINT:
+                return new EXITInstruction($this->line);
+            case Keywords::BREAK:
+                return new RETURNInstruction($this->line);
         }
 
     }

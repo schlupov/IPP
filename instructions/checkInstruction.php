@@ -43,7 +43,7 @@ class checkInstruction {
     }
 
     public function checkVariableName($identifier) {
-        if (!(preg_match("/^([a-zA-Z]|-|[_$&%*])([a-zA-Z]|-|[_$&%*]|[0-9]+)*$/",$identifier))){
+        if (!(preg_match("/^([a-zA-Z]|-|[_$&%*!?])([a-zA-Z]|-|[_$&%*!?]|[0-9]+)*$/",$identifier))){
             fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
             exit (23);
         }
@@ -60,7 +60,7 @@ class checkInstruction {
 
     public function checkLabel($arg) {
         $identifier = strpos($arg, "@") === true ? "error":$arg;
-        if ((preg_match("/^([a-zA-Z]|-|[_$&%*])([a-zA-Z]|-|[_$&%*]|[0-9]+)*$/",$identifier)) && ($identifier != "error")){
+        if ((preg_match("/^([a-zA-Z]|-|[_$&%*!?])([a-zA-Z]|-|[_$&%*!?]|[0-9]+)*$/",$identifier)) && ($identifier != "error")){
             return true;
         }
         return false;
@@ -69,7 +69,7 @@ class checkInstruction {
     public function checkConstant ($withoutAt) {
         foreach ($withoutAt as $var) {
             if (preg_match('/\d+/', $var)) {
-                if ($var == 0) {return ($withoutAt[0] == "int") && 1;}
+                if ($var == 0) {return ($withoutAt[0] == "int") && 1;} //je toto opravdu potreba???
                 return ($withoutAt[0] == "int") && $var;
             } elseif (($var == "true") || ($var == "false")) {
                 return ($withoutAt[0] == "bool") && $var;
