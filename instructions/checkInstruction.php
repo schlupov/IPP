@@ -68,7 +68,8 @@ class checkInstruction {
 
     public function checkConstant ($withoutAt) {
         foreach ($withoutAt as $var) {
-            if (is_numeric($var)) {
+            if (preg_match('/\d+/', $var)) {
+                if ($var == 0) {return ($withoutAt[0] == "int") && 1;}
                 return ($withoutAt[0] == "int") && $var;
             } elseif (($var == "true") || ($var == "false")) {
                 return ($withoutAt[0] == "bool") && $var;
@@ -89,7 +90,8 @@ class checkInstruction {
             }
         }
         foreach ($withoutAt as $var) {
-            if (is_numeric($var)) {
+            if (preg_match('/\d+/', $var)) {
+                if ($var == 0) {return ($withoutAt[0] == "int") && 1;}
                 return ($withoutAt[0] == "int") && $var;
             }
         }
@@ -141,6 +143,22 @@ class checkInstruction {
         }
         if (($withoutAt1[0] == "bool") && ($this->checkConstant($withoutAt1))) {
             return true;
+        }
+        return false;
+    }
+
+    public function checkStrToInt ($arg) {
+        if (strpos($arg, '@') == true) {
+            $withoutAt = explode('@', $arg);
+            if (count($withoutAt) < 2) {
+                return false;
+            }
+        }
+        foreach ($withoutAt as $var) {
+            if ($var == "string") {
+                $this->checkString($withoutAt[1]);
+                return true;
+            }
         }
         return false;
     }

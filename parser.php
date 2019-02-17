@@ -81,21 +81,21 @@ class Parser {
                 return new ORInstruction($this->line);
             case Keywords::NOT:
                 return new NOT($this->line);
-            case "INT2CHAR":
+            case Keywords::INT2CHAR:
                 return new INT2CHAR($this->line);
-            case "STRI2INT":
+            case Keywords::STRI2INT:
                 return new STRI2INT($this->line);
-            case "READ":
+            case Keywords::READ:
                 return new READ($this->line);
-            case "WRITE":
+            case Keywords::WRITE:
                 return new WRITE($this->line);
-            case "CONCAT":
+            case Keywords::CONCAT:
                 return new CONCAT($this->line);
-            case "STRLEN":
+            case Keywords::STRLEN:
                 return new STRLEN($this->line);
-            case "GETCHAR":
+            case Keywords::GETCHAR:
                 return new GETCHAR($this->line);
-            case "SETCHAR":
+            case Keywords::SETCHAR:
                 return new SETCHAR($this->line);
             case "TYPE":
                 return new TYPE($this->line);
