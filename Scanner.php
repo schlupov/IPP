@@ -1,10 +1,9 @@
 <?php
 
 require_once("./IsKeyword.php");
-require_once("./IScanner.php");
 require_once("./Keywords.php");
 
-class Scanner implements IScanner {
+class Scanner {
     private $stdin;
     private $flag;
 
@@ -38,12 +37,12 @@ class Scanner implements IScanner {
                     continue;
                 }
                 elseif ($this->specialWords($word[$i])) {
-                    $token["SPECIAL"][] = $word[$i];
+                    $token[$word[$i]][] = $word[$i];
                     continue;
                 }
                 elseif ($this->checkNumbers($word[$i])) {
                     $withoutBackSlash = $this->checkNumbers($word[$i]);
-                    $token["ESCAPE"][] = $withoutBackSlash;
+                    $token["STRING"][] = $withoutBackSlash;
                     continue;
                 }
                 array_push($token["STRING"],$word[$i]);
@@ -118,8 +117,13 @@ class Scanner implements IScanner {
     }
 }
 
-function removeComment($line){
+function removeComment($line){ //TODO: toto nebude brat # nekde jinde nez na zacatku radku a to je asi zle
     if (strpos($line, "#")!==false) {
+        $pos = strpos($line, '#');
+        if (($pos != 0) && ($line[$pos-1] != ' ')) {
+            fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
+            exit (23);
+        }
         return substr($line, 0, strpos($line, "#"));
     }
     return $line;

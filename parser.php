@@ -28,7 +28,8 @@ class Parser {
                         fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
                         exit (23);
                     }
-                    echo "OK";
+                    //echo "OK";
+                    return true;
                 }
             }
             if ($this->call === true) {
@@ -43,76 +44,49 @@ class Parser {
 
     protected function witchInstruction($keyWord){
         switch ($keyWord) {
-            case Keywords::MOVE:
-                return new MOVE($this->line);
             case Keywords::CREATEFRAME:
-                return new CREATEFRAME($this->line);
             case Keywords::PUSHFRAME:
-                return new PUSHFRAME($this->line);
             case Keywords::POPFRAME:
-                return new POPFRAME($this->line);
-            case Keywords::DEFVAR:
-                return new DEFVAR($this->line);
-            case Keywords::CALL:
-                return new CALL($this->line);
             case Keywords::RETURN:
-                return new RETURNInstruction($this->line);
-            case Keywords::PUSHS:
-                return new PUSHS($this->line);
+            case Keywords::BREAK:
+                return new NoArgumentsOperations($this->line);
+            case Keywords::DEFVAR:
             case Keywords::POPS:
-                return new POPS($this->line);
+                return new VarOperations($this->line);
+            case Keywords::CALL:
+            case Keywords::LABEL:
+            case Keywords::JUMP:
+                return new LABEL($this->line);
+            case Keywords::PUSHS:
+            case Keywords::WRITE:
+            case Keywords::EXIT:
+            case Keywords::DPRINT:
+                return new SymbOperation($this->line);
             case Keywords::ADD:
-                return new ADD($this->line);
             case Keywords::SUB:
-                return new SUB($this->line);
             case Keywords::MUL:
-                return new MUL($this->line);
             case Keywords::IDIV:
-                return new IDIV($this->line);
             case Keywords::LT:
-                return new LT($this->line);
             case Keywords::GT:
-                return new GT($this->line);
             case Keywords::EQ:
-                return new EQ($this->line);
             case Keywords::AND:
-                return new ANDInstruction($this->line);
             case Keywords::OR:
-                return new ORInstruction($this->line);
-            case Keywords::NOT:
-                return new NOT($this->line);
-            case Keywords::INT2CHAR:
-                return new INT2CHAR($this->line);
             case Keywords::STRI2INT:
-                return new STRI2INT($this->line);
+            case Keywords::CONCAT:
+            case Keywords::GETCHAR:
+            case Keywords::SETCHAR:
+                return new ArithmeticOperations($this->line);
+            case Keywords::MOVE:
+            case Keywords::NOT:
+            case Keywords::INT2CHAR:
+            case Keywords::STRLEN:
+            case Keywords::TYPE:
+                return new VarSymbOperation($this->line);
             case Keywords::READ:
                 return new READ($this->line);
-            case Keywords::WRITE:
-                return new WRITE($this->line);
-            case Keywords::CONCAT:
-                return new CONCAT($this->line);
-            case Keywords::STRLEN:
-                return new STRLEN($this->line);
-            case Keywords::GETCHAR:
-                return new GETCHAR($this->line);
-            case Keywords::SETCHAR:
-                return new SETCHAR($this->line);
-            case Keywords::TYPE:
-                return new TYPE($this->line);
-            case Keywords::LABEL:
-                return new LABEL($this->line);
-            case Keywords::JUMP:
-                return new JUMP($this->line);
             case Keywords::JUMPIFEQ:
-                return new JUMPIFEQ($this->line);
             case Keywords::JUMPIFNEQ:
-                return new JUMPIFEQ($this->line);
-            case Keywords::EXIT:
-                return new EXITInstruction($this->line);
-            case Keywords::DPRINT:
-                return new EXITInstruction($this->line);
-            case Keywords::BREAK:
-                return new RETURNInstruction($this->line);
+                return new JumpOperations($this->line);
         }
 
     }
