@@ -1,29 +1,37 @@
 import xml.etree.ElementTree as ElementTree
+import collections
 
 
 class XML:
-
     def __init__(self, xml_file):
         self.tree = ElementTree.parse(xml_file)
 
-    def parse(self):
-        tmp = {}
-        tree = {}
+    def parse_instruction(self):
+        tree = []
         root = self.tree.getroot()
+        instruction = None
         for i in range(len(root)):
+            arguments_list = []
             for y in range(len(root[i])):
-                tmp["type"] = root[i][y].attrib["type"]
-                tmp["instruction"] = root[i].attrib["opcode"]
-                tmp["argument"] = root[i][y].text
-                tree[i] = tmp
+                opcode = root[i].attrib["opcode"]
+                arg_number = root[i][y].tag
+                type_of_arg = root[i][y].attrib["type"]
+                text = root[i][y].text
+                order = root[i].attrib["order"]
+                instruction = collections.namedtuple(
+                    "instruction", "order opcode arguments"
+                )
+                arguments_list.extend([(arg_number, type_of_arg, text)])
+                instruction = instruction(
+                    order=order, opcode=opcode, arguments=arguments_list
+                )
+            tree.append(instruction)
         return tree
-
-    def return_order(self):
-        order = 0
-        for child in self.tree.getroot():
-            order = child.attrib
-        return order["order"]
 
 
 test = XML("./test.xml")
-print(test.parse())
+
+for instruction in test.parse_instruction():
+    print(instruction.arguments)
+
+

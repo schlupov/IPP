@@ -120,7 +120,7 @@ class Scanner {
 function removeComment($line){ //TODO: toto nebude brat # nekde jinde nez na zacatku radku a to je asi zle
     if (strpos($line, "#")!==false) {
         $pos = strpos($line, '#');
-        if (($pos != 0) && ($line[$pos-1] != ' ')) {
+        if (($pos != 0) && ($line[$pos-1] != ' ')) { //TODO: neni chyba zrejme
             fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
             exit (23);
         }
