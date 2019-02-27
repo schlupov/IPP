@@ -12,7 +12,12 @@ class CreateXML {
         $domTree->formatOutput = true;
 
         $root = $domTree->createElement("program");
-        $root->setAttribute("language", "IPPcode19");
+        $root->setAttribute("language", $this->forXML[0]);
+        if (count($this->forXML) == 1) {
+            $domTree->appendChild($root);
+            fwrite(STDOUT, $domTree->saveXML());
+            exit(0);
+        }
 
         $counter = 0;
         for($i = 1; $i < count($this -> forXML); $i++) {
@@ -26,7 +31,8 @@ class CreateXML {
                 }
                 $instructionNode->setAttribute("opcode", $instruction);
                 if (($this -> forXML[$i][$c][0] == "CALL") || ($this -> forXML[$i][$c][0] == "JUMP") ||
-                    ($this -> forXML[$i][$c][0] == "JUMPIFEQ") || ($this -> forXML[$i][$c][0] == "JUMPIFNEQ")) {
+                    ($this -> forXML[$i][$c][0] == "JUMPIFEQ") || ($this -> forXML[$i][$c][0] == "JUMPIFNEQ")
+                    || ($this -> forXML[$i][$c][0] == "LABEL")) {
                     foreach ($this -> forXML[$i+1] as $p => $g) {
                         $literal = $this->forXML[$i+1][$p][0];
                     }

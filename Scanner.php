@@ -119,11 +119,6 @@ class Scanner {
 
 function removeComment($line){ //TODO: toto nebude brat # nekde jinde nez na zacatku radku a to je asi zle
     if (strpos($line, "#")!==false) {
-        $pos = strpos($line, '#');
-        if (($pos != 0) && ($line[$pos-1] != ' ')) { //TODO: neni chyba zrejme
-            fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
-            exit (23);
-        }
         return substr($line, 0, strpos($line, "#"));
     }
     return $line;
@@ -131,6 +126,9 @@ function removeComment($line){ //TODO: toto nebude brat # nekde jinde nez na zac
 
 function readFirstLine($line){
     $firstLine=strtolower(fgets($line));
+    if (strpos($firstLine, "#")!==false) {
+        $firstLine = substr($firstLine, 0, strpos($firstLine, "#"));
+    }
     if(trim($firstLine)!=".ippcode19") {
         fwrite(STDERR, "chybna nebo chybejici hlavicka ve zdrojovem kodu zapsanem v IPPcode19.\n");
         exit (21);

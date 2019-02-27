@@ -7,6 +7,20 @@ require_once("./CreateXML.php");
 //***************************************************************************
 //$fh = fopen('php://stdin', 'r');
 $fh = fopen("test.txt", "r");
+function readArgv($argv)
+{
+    if (count($argv) < 3 and $argv[1] == "--help") {
+        fwrite(STDOUT, "Skript nacita ze STDIN jazyk IPPcode19 a provadi lexikalni a syntaktickou analyzu.\n");
+        exit(0);
+    } else {
+        fwrite(STDERR, "Spatne pouziti parametru.\n");
+        exit (10);
+    }
+}
+
+if (count($argv) > 1) {
+    readArgv($argv);
+}
 readFirstLine($fh);
 $forXML = array();
 $forXML[] = "IPPcode19";
