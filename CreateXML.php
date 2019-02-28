@@ -19,6 +19,20 @@ class CreateXML {
             exit(0);
         }
 
+        for($i = 1; $i < count($this -> forXML); $i++) {
+            foreach ($this->forXML[$i] as $c => $z) {
+                if (($this->forXML[$i][$c][0] == "CALL") || ($this->forXML[$i][$c][0] == "JUMP") ||
+                    ($this->forXML[$i][$c][0] == "JUMPIFEQ") || ($this->forXML[$i][$c][0] == "JUMPIFNEQ")
+                    || ($this->forXML[$i][$c][0] == "LABEL")) {
+                    foreach ($this->forXML[$i + 1] as $p => $g) {
+                        $literal = strtolower($this->forXML[$i + 1][$p][0]);
+                        unset($this->forXML[$i + 1][$p]);
+                        $this->forXML[$i + 1]["STRING"][] = $literal;
+                    }
+                }
+            }
+        }
+
         $counter = 0;
         for($i = 1; $i < count($this -> forXML); $i++) {
             foreach ($this -> forXML[$i] as $c => $z) {
@@ -34,11 +48,11 @@ class CreateXML {
                     ($this -> forXML[$i][$c][0] == "JUMPIFEQ") || ($this -> forXML[$i][$c][0] == "JUMPIFNEQ")
                     || ($this -> forXML[$i][$c][0] == "LABEL")) {
                     foreach ($this -> forXML[$i+1] as $p => $g) {
-                        $literal = $this->forXML[$i+1][$p][0];
+                        $literal = strtolower($this -> forXML[$i+1][$p][0]);
+                        $callCounter++;
+                        $flag = 0;
+                        $instructionNode->appendChild($this->PrepareArgument($flag, $literal, $domTree, $this -> forXML[$i], $callCounter));
                     }
-                    $callCounter++;
-                    $flag = 0;
-                    $instructionNode->appendChild($this->PrepareArgument($flag, $literal, $domTree, $this -> forXML[$i], $callCounter));
                 }
                 if (($c != "KEYWORD") && ($c == "DIGIT" || $c == "STRING" || $c == "true" ||
                     $c == "false" || $c == "nil")){
