@@ -29,7 +29,13 @@ class Scanner {
         $token["STRING"] = array();
         for($i = 0; $i < count($word); $i++) {
             if (is_numeric($word[$i]) == true) {
-                array_push($token["DIGIT"],$word[$i]);
+                if (preg_match("/^[0-9]*$/u", $word[$i])) {
+                    array_push($token["DIGIT"], $word[$i]);
+                }
+                else {
+                    fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
+                    exit (23);
+                }
             }
             elseif (is_string($word[$i]) == true){
                 if ($this->keyWords(strtoupper($word[$i]))) {

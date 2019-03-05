@@ -52,7 +52,7 @@ class checkInstruction {
 
     public function checkString($var) {
         // TODO: regex neni uplne dobre pro ty cisla
-        if (preg_match("/^([a-zA-Z\x{0021}\x{0022}\x{0024}-\x{005B}\x{005D}-\x{FFFF}|(\\\\[0-90-90-9])*$/u", $var)) {
+        if (preg_match("/^([a-zA-Z\x{0021}\x{0022}\x{0024}-\x{002F}\x{003A}-\x{FFFF}]*(\x{005C}[0-9]{3})*)*$/u", $var)) {
             return true;
         }
         fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
