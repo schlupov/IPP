@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="READ">
+    <arg1 type="type">string</arg1>
+    <arg2 type="var">LF@var</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="CALL">
+    <arg1 type="label">label</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">counter</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="JUMPIFEQ">
+    <arg1 type="label">label</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="MUL">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="GETCHAR">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="WRITE">
+    <arg1 type="string">text</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@-counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">co\123unter</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="ADD">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="POPFRAME"/>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@_counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="PUSHS">
+    <arg1 type="string">text</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="GT">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@?counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="INT2CHAR">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="PUSHFRAME"/>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="CREATEFRAME"/>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="MOVE">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="CONCAT">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@&amp;counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@!counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="TYPE">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@*counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="EXIT">
+    <arg1 type="string">text</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">LF@var</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="EQ">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">co</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="STRLEN">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DPRINT">
+    <arg1 type="string">text</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="BREAK"/>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="OR">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="LABEL">
+    <arg1 type="label">label</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="AND">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="POPS">
+    <arg1 type="var">LF@var</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">co\123unter</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="JUMPIFNEQ">
+    <arg1 type="label">label</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">co\123unter</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">counter</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@$counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="SUB">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@%counter</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="NOT">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="RETURN"/>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="DEFVAR">
+    <arg1 type="var">GF@counter</arg1>
+  </instruction>
+  <instruction order="2" opcode="MOVE">
+    <arg1 type="var">GF@counter</arg1>
+    <arg2 type="string">coun</arg2>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="JUMP">
+    <arg1 type="label">label</arg1>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="LT">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="STRI2INT">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="SETCHAR">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
+<?xml version="1.0" encoding="UTF-8"?>
+<program language="IPPcode19">
+  <instruction order="1" opcode="IDIV">
+    <arg1 type="var">LF@var</arg1>
+    <arg2 type="string">text</arg2>
+    <arg3 type="string">text</arg3>
+  </instruction>
+</program>
