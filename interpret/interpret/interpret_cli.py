@@ -45,7 +45,7 @@ class XML:
                     return False
         return True
 
-    def parse_instruction(self):
+    def GetElementsFromXml(self):
         tree = []
         root = self.tree.getroot()
         instruction = None

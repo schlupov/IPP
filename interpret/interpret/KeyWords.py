@@ -13,6 +13,7 @@ class KeyWords(Enum):
     POPS = "POPS"
     ADD = "ADD"
     SUB = "SUB"
+    MUL = "MUL"
     IDIV = "IDIV"
     LT = "LT"
     GT = "GT"
