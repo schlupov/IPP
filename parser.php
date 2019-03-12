@@ -3,6 +3,11 @@
 require_once("./Scanner.php");
 require_once("./Keywords.php");
 
+/**
+* Třída Parser je hlavni třída syntaktické analýzy. Pracuje s tokeny a řádky načtené pomocí parse.php.
+* @param string $tokenized řádek ze stdin převedený na asociativní pole reprezentující tokeny
+* @param string $line řádek ze stdin
+*/
 class Parser {
 
     private $tokenized;
@@ -17,6 +22,12 @@ class Parser {
         }
     }
 
+    /**
+    * Metoda instruction zkontroluje, že řádek začíná některým z operačních kodu a podle toho o který operační
+    * kod se jedná, vytvoří instanci třídy dané instrukce a předá této třídě řádek ke kontrole.
+    * Začíná-li řádek neznámým operačním kodem, je program ukončen s chybou 22. Pokud řádek neprojde syntaktickou
+    * kontrolou, je program ukončen s chybou 23.
+    */
     public function instruction() {
         foreach($this->tokenized  as $key=>$value){
             foreach($value as $k => $v){
@@ -28,7 +39,6 @@ class Parser {
                         fwrite(STDERR, "Lexikalni nebo syntakticka chyba.\n");
                         exit (23);
                     }
-                    //echo "OK";
                     return true;
                 }
             }
@@ -42,6 +52,9 @@ class Parser {
         }
     }
 
+    /**
+    * Metoda na základě proměnné v $keyWord rozhodne o který operační kod se jedná na daném řádku
+    */
     protected function witchInstruction($keyWord){
         switch ($keyWord) {
             case Keywords::CREATEFRAME:

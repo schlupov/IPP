@@ -1,12 +1,20 @@
 <?php
 
-
+/**
+* Třída vytváří XML reprezentaci kodu IPPcode19
+* @param string $forXML řádek po syntaktické analýze
+*/
 class CreateXML {
 
     public function __construct($forXML) {
         $this -> forXML = $forXML;
     }
 
+    /**
+    * Metoda připravuje XML a tiskne XML reprezentaci IPPcode19 na stdout.
+    * V případě, kdy je návěští pojmenováno jako klíčové slovo, např. LABEL label, je nutné
+    * převést typ tokenu na string. Pro vytvoření XML metoda využívá DOM elementů
+    */
     public function prepareXML () {
         $domTree=new DOMDocument('1.0', 'UTF-8');
         $domTree->formatOutput = true;
@@ -78,13 +86,20 @@ class CreateXML {
                 $root->appendChild($instructionNode);
 
                 $domTree->appendChild($root);
-
-                //return $domTree;
             }
         }
         fwrite(STDOUT, $domTree->saveXML());
     }
 
+    /**
+    * Třída připravuje argumenty, tedy číslo argumentu, jeho typ a text uvnitř
+    * @param string $flag určuje jaký type bude uvnitř elementu arg
+    * @param string $literal text, který bude vložen do elementu arg
+    * @param string $domTree strom DOM elementů, kam bude element arg přidán
+    * @param string $type určuje jaký type bude uvnitř elementu arg z typu tokenu ze scanneru
+    * @param string $callCounter určuje, jestli se jedna o arg1, arg2 nebo arg3
+    * vraci uzel s novým elementem
+    */
     private function PrepareArgument ($flag, $literal, $domTree, $type, $callCounter) {
         if ($flag == 1) {
             foreach ($type as $c => $z) {

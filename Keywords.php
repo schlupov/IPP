@@ -1,5 +1,8 @@
 <?php
 
+/**
+* Třída uchovává všechny možné operační kody jazyka IPPcode19
+*/
 class Keywords {
     public const MOVE = "MOVE";
     public const CREATEFRAME = "CREATEFRAME";
@@ -37,12 +40,18 @@ class Keywords {
     public const DPRINT = "DPRINT";
     public const BREAK = "BREAK";
 
+    /**
+    * Metoda vrací konstanty třídy Keywords
+    */
     public static function getConstants() {
         $oClass = new ReflectionClass(__CLASS__);
         return $oClass->getConstants();
     }
 }
 
+/**
+* Třída uchovává všechny možné speciální slova jazyka IPPcode19
+*/
 class SpecialWords {
     public const GF = "GF";
     public const TF = "TF";
@@ -56,6 +65,9 @@ class SpecialWords {
     public const end = "end";
     public const while = "while";
 
+    /**
+    * Metoda vrací konstanty třídy SpecialWords
+    */
     public static function getConstants() {
         $oClass = new ReflectionClass(__CLASS__);
         return $oClass->getConstants();
