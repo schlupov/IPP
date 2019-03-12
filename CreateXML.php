@@ -92,7 +92,7 @@ class CreateXML {
     }
 
     /**
-    * Třída připravuje argumenty, tedy číslo argumentu, jeho typ a text uvnitř
+    * Metoda připravuje argumenty, tedy číslo argumentu, jeho typ a text uvnitř
     * @param string $flag určuje jaký type bude uvnitř elementu arg
     * @param string $literal text, který bude vložen do elementu arg
     * @param string $domTree strom DOM elementů, kam bude element arg přidán
