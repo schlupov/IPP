@@ -48,6 +48,16 @@ class SymbolTable:
             return symbol
         exit(54)
 
+    def FindInSymbTable(self, arguments):
+        frame, var = self.Frame(arguments)
+        symbolTable = self.GetFrame(frame)
+        if symbolTable is None:
+            exit(55)
+        if var in symbolTable.keys():
+            symbol = symbolTable[var]
+            return symbol
+        exit(54)
+
     def CreateFrame(self):
         self.TemporaryFrame = dict()
 

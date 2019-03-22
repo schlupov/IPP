@@ -32,6 +32,18 @@ def arithmetic_operation(func):
     return check
 
 
+def int2char_var(func):
+    @wraps(func)
+    def check(**kwargs):
+        if len(kwargs["arg"]) > 2:
+            return False
+        elif kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
+            return "Var"
+        return False
+
+    return check
+
+
 def var(func):
     @wraps(func)
     def check(**kwargs):
@@ -47,9 +59,7 @@ def var(func):
 def label(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 1:
-            return False
-        elif kwargs["arg"][0][1] == "label" and check_label(kwargs["arg"][0][2]):
+        if kwargs["arg"][0][1] == "label" and check_label(kwargs["arg"][0][2]):
             return "Label"
         return False
 
@@ -59,17 +69,33 @@ def label(func):
 def symb(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 1:
-            return False
-        elif check_var(kwargs["arg"][0][2]) or (
-            check_int(kwargs["arg"][0][2])
-            or check_string(kwargs["arg"][0][2])
-            or check_bool(kwargs["arg"][0][2])
-            or check_var(kwargs["arg"][0][2])
-            or check_nil(kwargs["arg"][0][2])
-        ):
-            return "Symb"
-        return False
+        if kwargs["arg"][0][1] == "var":
+            if not check_var(kwargs["arg"][0][2]):
+                return False
+        elif kwargs["arg"][0][1] == "string":
+            if not check_string(kwargs["arg"][0][2]):
+                return False
+        elif kwargs["arg"][0][1] == "int":
+            if not check_int(kwargs["arg"][0][2]):
+                return False
+        elif kwargs["arg"][0][1] == "bool":
+            if not check_bool(kwargs["arg"][0][2]):
+                return False
+        elif kwargs["arg"][0][1] == "nil":
+            if not check_nil(kwargs["arg"][0][2]):
+                return False
+        return True
+
+    return check
+
+
+def str2int_symb(func):
+    @wraps(func)
+    def check(**kwargs):
+        if kwargs["arg"][1] == "string":
+            if not check_string(kwargs["arg"][2]):
+                return False
+        return "Symb"
 
     return check
 
@@ -77,11 +103,10 @@ def symb(func):
 def arithmetic_operation_symb(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 3:
-            return False
-        elif check_int(kwargs["arg"][2]):
-            return "Symb"
-        return False
+        if kwargs["arg"][1] == "int":
+            if not check_int(kwargs["arg"][2]):
+                return False
+        return "Symb"
 
     return check
 
@@ -89,15 +114,15 @@ def arithmetic_operation_symb(func):
 def relational_operation_symb(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 3:
-            return False
-        elif not (
-            check_int(kwargs["arg"][2])
-            or check_bool(kwargs["arg"][2])
-            or check_string(kwargs["arg"][2])
-            or check_nil(kwargs["arg"][2])
-        ):
-            return False
+        if kwargs["arg"][1] == "string":
+            if not check_string(kwargs["arg"][2]):
+                return False
+        elif kwargs["arg"][1] == "int":
+            if not check_int(kwargs["arg"][2]):
+                return False
+        elif kwargs["arg"][1] == "bool":
+            if not check_bool(kwargs["arg"][2]):
+                return False
         return "Symb"
 
     return check

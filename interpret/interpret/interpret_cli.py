@@ -9,7 +9,10 @@ class XML:
 
     @property
     def tree(self):
-        return ElementTree.parse(self._xml_file)
+        try:
+            return ElementTree.parse(self._xml_file)
+        except ElementTree.ParseError:
+            exit(31)
 
     def check_xml_structure(self):
         root = self.tree.getroot()
