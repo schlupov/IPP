@@ -1,6 +1,6 @@
 from enum import Enum
 
-from interpret.Decorators import check_int, check_bool, check_string, check_nil
+from Decorators import check_int, check_bool, check_string, check_nil
 
 
 class SymbolTable:
@@ -119,4 +119,4 @@ def checkType(value):
 def checkNumberOfArguments(Arguments, number):
     if len(Arguments) == number:
         return True
-    exit(33)
+    exit(32)

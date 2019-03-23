@@ -5,9 +5,7 @@ from functools import wraps
 def move_operands(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 2:
-            return False
-        elif check_var(kwargs["arg"][0][2]) and (
+        if check_var(kwargs["arg"][0][2]) and (
             check_int(kwargs["arg"][1][2])
             or check_string(kwargs["arg"][1][2])
             or check_bool(kwargs["arg"][1][2])
@@ -23,9 +21,7 @@ def move_operands(func):
 def arithmetic_operation(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 3:
-            return False
-        elif kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
+        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
             return "Arithmetic"
         return False
 
@@ -35,9 +31,7 @@ def arithmetic_operation(func):
 def int2char_var(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 2:
-            return False
-        elif kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
+        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
             return "Var"
         return False
 
@@ -47,9 +41,7 @@ def int2char_var(func):
 def var(func):
     @wraps(func)
     def check(**kwargs):
-        if len(kwargs["arg"]) > 1:
-            return False
-        elif kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
+        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
             return "Var"
         return False
 
@@ -83,6 +75,23 @@ def symb(func):
                 return False
         elif kwargs["arg"][0][1] == "nil":
             if not check_nil(kwargs["arg"][0][2]):
+                return False
+        return True
+
+    return check
+
+
+def read_type(func):
+    @wraps(func)
+    def check(**kwargs):
+        if kwargs["arg"][1] == "string":
+            if not check_string(kwargs["arg"][2]):
+                return False
+        elif kwargs["arg"][1] == "int":
+            if not check_int(kwargs["arg"][2]):
+                return False
+        elif kwargs["arg"][1] == "bool":
+            if not check_bool(kwargs["arg"][2]):
                 return False
         return True
 

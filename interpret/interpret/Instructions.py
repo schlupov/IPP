@@ -1,7 +1,8 @@
+import argparse
 import re
 import sys
 
-from interpret.Decorators import (
+from Decorators import (
     move_operands,
     move_types,
     no_operands,
@@ -11,11 +12,17 @@ from interpret.Decorators import (
     label,
     arithmetic_operation,
     arithmetic_operation_symb,
-    relational_operation_symb, int2char_var, str2int_symb)
-from interpret.KeyWords import KeyWords
-from interpret.Semantic import SymbolTable, checkType, checkNumberOfArguments
-from interpret.interpret_cli import XML
-from interpret.Semantic import Token
+    relational_operation_symb,
+    int2char_var,
+    str2int_symb,
+    read_type,
+    check_int,
+    check_string,
+)
+from KeyWords import KeyWords
+from Semantic import SymbolTable, checkType, checkNumberOfArguments
+from interpret_cli import XML
+from Semantic import Token
 
 
 class Stack:
@@ -70,7 +77,9 @@ class InstructionBase(XML):
     stack = Stack()
     instructionPointer = InstuctionPointer()
 
-    def __init__(self, xml_file):
+    def __init__(self, read_file=None, xml_file=None):
+        self.read_file = read_file
+        self.xml_file = xml_file
         super().__init__(xml_file)
 
     @classmethod
@@ -79,7 +88,8 @@ class InstructionBase(XML):
 
     def ChooseOperationCodeFromXml(self):
         table = SymbolTable()
-        for instruction in self.GetElementsFromXml():
+        xml = self.GetElementsFromXml()
+        for instruction in xml:
             self.CheckInstructionInXml(instruction)
             if instruction.opcode == KeyWords.MOVE.name:
                 self.CheckMove(instruction, table)
@@ -126,6 +136,8 @@ class InstructionBase(XML):
                 self.CheckWrite(instruction, table)
             elif instruction.opcode == KeyWords.CONCAT.name:
                 self.CheckConcat(instruction, table)
+            elif instruction.opcode == KeyWords.READ.name:
+                self.CheckRead(instruction, table)
             elif instruction.opcode == KeyWords.STRLEN.name:
                 self.CheckStrlen(instruction, table)
             elif instruction.opcode == KeyWords.GETCHAR.name:
@@ -138,7 +150,10 @@ class InstructionBase(XML):
                 self.CheckLabel(instruction)
             elif instruction.opcode == KeyWords.JUMP.name:
                 self.CheckJump(instruction)
-            elif instruction.opcode == KeyWords.JUMPIFEQ.name or instruction.opcode == KeyWords.JUMPIFNEQ.name:
+            elif (
+                instruction.opcode == KeyWords.JUMPIFEQ.name
+                or instruction.opcode == KeyWords.JUMPIFNEQ.name
+            ):
                 self.CheckJumpIfEq(instruction, table)
             elif instruction.opcode == KeyWords.EXIT.name:
                 self.CheckExit(instruction)
@@ -148,6 +163,7 @@ class InstructionBase(XML):
                 self.CheckBreak(instruction)
 
     def CheckDefvarAndModifySmybTable(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 1)
         changedSymbolTable = DefvarOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperationAndExecute()
@@ -155,6 +171,7 @@ class InstructionBase(XML):
         self.instructionPointer.ip += 1
 
     def CheckFrameInstructionAndModifySymbTable(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 0)
         changedSymbolTable = OperationWithNoOperands(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperationAndExecute()
@@ -162,105 +179,153 @@ class InstructionBase(XML):
         self.instructionPointer.ip += 1
 
     def CheckMove(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 2)
         changedSymbolTable = MoveOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckPushsAndModifyStack(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 1)
         PushsOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckPopsAndModifyStack(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 1)
         varPoppedFromStack = PopsOperation(
             instruction.opcode, instruction.arguments, self._xml_file
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckCallAndGoToLabel(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 1)
         CallOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckReturn(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 0)
         ReturnOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckArithmeticOperation(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 3)
         changedSymbolTable = ArithmeticOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckRelationalOperation(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 3)
         changedSymbolTable = RelationalOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckBooleanOperation(self, instruction, table):
+        if instruction.opcode != KeyWords.NOT.name:
+            checkNumberOfArguments(instruction.arguments, 3)
+        else:
+            checkNumberOfArguments(instruction.arguments, 2)
         changedSymbolTable = BooleanOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckIntToChar(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 2)
         changedSymbolTable = IntToCharOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckStrToInt(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 3)
         changedSymbolTable = StrToIntOperation(
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckWrite(self, instruction, table):
-        WriteOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 1)
+        WriteOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckConcat(self, instruction, table):
-        ConcatOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 3)
+        ConcatOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckStrlen(self, instruction, table):
-        StrlenOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 2)
+        StrlenOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckGetchar(self, instruction, table):
-        GetCharOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 3)
+        GetCharOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckSetchar(self, instruction, table):
-        SetCharOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 3)
+        SetCharOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckType(self, instruction, table):
-        TypeOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 2)
+        TypeOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckLabel(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 1)
         LabelOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckJump(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 1)
         JumpOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckJumpIfEq(self, instruction, table):
-        JumpIfEqOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 3)
+        JumpIfEqOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckExit(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 1)
         ExitOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckDPrint(self, instruction, table):
-        DPrintOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
+        checkNumberOfArguments(instruction.arguments, 1)
+        DPrintOperation(
+            instruction.opcode, instruction.arguments, self._xml_file, table
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckBreak(self, instruction):
+        checkNumberOfArguments(instruction.arguments, 0)
         BreakOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
+        self.instructionPointer.ip += 1
+
+    def CheckRead(self, instruction, table):
+        checkNumberOfArguments(instruction.arguments, 2)
+        changedSymbolTable = ReadOperation(
+            instruction.opcode, instruction.arguments, self.xml_file, table, self.read_file
+        ).CheckOperation()
         self.instructionPointer.ip += 1
 
     def CheckInstructionInXml(self, instruction):
@@ -268,7 +333,7 @@ class InstructionBase(XML):
             not self.IsKeyword(instruction.opcode)
             or re.match("^[0-9]+$", instruction.order) is None
         ):
-            exit(33)
+            exit(32)
 
     @staticmethod
     def IsKeyword(opcode):
@@ -304,12 +369,14 @@ class MoveOperation(InstructionBase):
         ):
             exit(33)
         symbolTable = self.InitSymbolTable(self.table)
-        symbolFromSymbTable = self.Execute(symbolTable)
-        return symbolFromSymbTable
+        symbolTable = self.Execute(symbolTable)
+        return symbolTable
 
     def Execute(self, symbolTable):
         symbolFromSymbTable = symbolTable.GetVarFromSymbTable(self.Arguments)
-        return symbolFromSymbTable
+        token = Token(symbolFromSymbTable.name, self.Arguments[1][1], self.Arguments[1][2])
+        symbolFromSymbTable.setTokenValue(token)
+        return symbolTable
 
 
 class PushsOperation(InstructionBase):
@@ -527,14 +594,8 @@ class BooleanOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        if self.Opcode == KeyWords.NOT.name:
-            checkNumberOfArguments(self.Arguments, 2)
-        elif self.Opcode != KeyWords.NOT.name:
-            checkNumberOfArguments(self.Arguments, 3)
-
         if self.Opcode == KeyWords.NOT.name and not (
-            self.AreOperandsOk(arg=self.Arguments)
-            and self.AreOperandsTypeOk(arg=self.Arguments[1])
+            self.AreOperandsOk(arg=self.Arguments) and self.AreOperandsTypeOk(arg=self.Arguments[1])
         ):
             exit(33)
         elif self.Opcode != KeyWords.NOT.name and not (
@@ -587,10 +648,7 @@ class IntToCharOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 2)
-        if not (
-            self.IsSymbOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)
-        ):
+        if not (self.IsSymbOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)):
             exit(33)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
@@ -630,9 +688,9 @@ class StrToIntOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 3)
         if not (
-            self.IsSymb2Ok(arg=self.Arguments[2]) and self.IsSymb1Ok(arg=self.Arguments[1])
+            self.IsSymb2Ok(arg=self.Arguments[2])
+            and self.IsSymb1Ok(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
             exit(33)
@@ -649,6 +707,59 @@ class StrToIntOperation(InstructionBase):
         except IndexError:
             exit(58)
         symbol.setTokenValue(char_ord)
+        return symbolTable
+
+
+class ReadOperation(InstructionBase):
+    def __init__(self, Opcode, Arguments, xml_file, table, read_file):
+        self.Opcode = Opcode
+        self.Arguments = Arguments
+        self.table = table
+        InstructionBase.__init__(self, read_file, xml_file)
+
+    @staticmethod
+    @read_type
+    def IsTypeOk(arg):
+        return arg
+
+    @staticmethod
+    @arithmetic_operation
+    def IsVarOk(arg):
+        return arg
+
+    def CheckOperation(self):
+        if not (self.IsTypeOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)):
+            exit(33)
+        symbolTable = self.InitSymbolTable(self.table)
+        symbolTable = self.Execute(symbolTable)
+        return symbolTable
+
+    def Execute(self, symbolTable):
+        symbol = symbolTable.GetVarFromSymbTable(self.Arguments)
+        if self.read_file is None:
+            inputData = input()
+        else:
+            inputData = open(self.read_file, 'r')
+            inputData = str(inputData.readline())
+
+        if self.Arguments[1][2] == "bool":
+            if inputData.lower() == "true":
+                token = Token(symbol.name, "bool", "bool" + "@" + inputData)
+            else:
+                token = Token(symbol.name, "bool", "bool" + "@" + "false")
+            symbol.setTokenValue(token)
+        elif self.Arguments[1][2] == "int":
+            if check_int(inputData):
+                token = Token(symbol.name, "int", "int" + "@" + inputData)
+            else:
+                token = Token(symbol.name, "int", "int" + "@" + "0")
+            symbol.setTokenValue(token)
+        elif self.Arguments[1][2] == "string":
+            if check_string(inputData):
+                token = Token(symbol.name, "string", "string" + "@" + inputData)
+            else:
+                token = Token(symbol.name, "string", "string" + "@" + "")
+            symbol.setTokenValue(token)
         return symbolTable
 
 
@@ -716,10 +827,10 @@ class ConcatOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 3)
         if not (
-                self.IsSymbOk(arg=self.Arguments[2]) and self.IsSymbOk(arg=self.Arguments[1])
-                and self.IsVarOk(arg=self.Arguments)
+            self.IsSymbOk(arg=self.Arguments[2])
+            and self.IsSymbOk(arg=self.Arguments[1])
+            and self.IsVarOk(arg=self.Arguments)
         ):
             exit(33)
         symbolTable = self.InitSymbolTable(self.table)
@@ -752,10 +863,7 @@ class StrlenOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 2)
-        if not (
-            self.IsSymbOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)
-        ):
+        if not (self.IsSymbOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)):
             exit(33)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
@@ -798,9 +906,9 @@ class GetCharOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 3)
         if not (
-            self.IsSymb2Ok(arg=self.Arguments[2]) and self.IsSymb1Ok(arg=self.Arguments[1])
+            self.IsSymb2Ok(arg=self.Arguments[2])
+            and self.IsSymb1Ok(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
             exit(33)
@@ -843,9 +951,9 @@ class SetCharOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 3)
         if not (
-            self.IsSymb2Ok(arg=self.Arguments[2]) and self.IsSymb1Ok(arg=self.Arguments[1])
+            self.IsSymb2Ok(arg=self.Arguments[2])
+            and self.IsSymb1Ok(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
             exit(33)
@@ -866,7 +974,7 @@ class SetCharOperation(InstructionBase):
 
     @staticmethod
     def change_char(s, p, r):
-        return s[:p]+r+s[p+1:]
+        return s[:p] + r + s[p + 1 :]
 
 
 class TypeOperation(InstructionBase):
@@ -887,10 +995,7 @@ class TypeOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 2)
-        if not (
-            self.IsSymbOk(arg=self.Arguments) and self.IsVarOk(arg=self.Arguments)
-        ):
+        if not (self.IsSymbOk(arg=self.Arguments) and self.IsVarOk(arg=self.Arguments)):
             exit(33)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
@@ -926,7 +1031,6 @@ class LabelOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 1)
         if not self.IsLabelOk(arg=self.Arguments):
             exit(33)
         self.Execute()
@@ -947,7 +1051,6 @@ class JumpOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 1)
         if not self.IsLabelOk(arg=self.Arguments):
             exit(33)
         self.Execute()
@@ -974,9 +1077,11 @@ class JumpIfEqOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 3)
-        if not (self.IsLabelOk(arg=self.Arguments) and self.IsSymbolTypeOk(arg=self.Arguments[1])
-                and self.IsSymbolTypeOk(arg=self.Arguments[2])):
+        if not (
+            self.IsLabelOk(arg=self.Arguments)
+            and self.IsSymbolTypeOk(arg=self.Arguments[1])
+            and self.IsSymbolTypeOk(arg=self.Arguments[2])
+        ):
             exit(33)
         symbolTable = self.InitSymbolTable(self.table)
         self.Execute(symbolTable)
@@ -1080,7 +1185,6 @@ class ExitOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 1)
         if self.Arguments[0][1] != "int":
             exit(57)
         if not self.IsIntOk(arg=self.Arguments[0]):
@@ -1103,7 +1207,6 @@ class DPrintOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 1)
         if not self.IsSymbOk(arg=self.Arguments):
             exit(33)
 
@@ -1128,7 +1231,6 @@ class BreakOperation(InstructionBase):
         InstructionBase.__init__(self, xml_file)
 
     def CheckOperation(self):
-        checkNumberOfArguments(self.Arguments, 0)
         self.Execute()
 
     def Execute(self):
@@ -1136,8 +1238,24 @@ class BreakOperation(InstructionBase):
         sys.stderr.write("\n")
 
 
+def parse_arguments():
+    rp_parser = argparse.ArgumentParser(
+        description="Interpret nacita xml reprezentaci kodu IPPcode19 a provadi interpretaci na stdout",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    rp_parser.add_argument("--source")
+    rp_parser.add_argument("--input")
+    arguments = rp_parser.parse_args()
+    return arguments
+
+
 if __name__ == "__main__":
-    input_xml = InstructionBase("./test.xml")
+    arguments = parse_arguments()
+    if arguments.source is None:
+        xml = "stdin"
+    else:
+        xml = arguments.source
+    input_xml = InstructionBase(xml_file=xml, read_file=arguments.input)
     if not input_xml.check_xml_structure():
-        exit(33)
+        exit(32)
     input_xml.ChooseOperationCodeFromXml()
