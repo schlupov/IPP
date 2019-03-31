@@ -147,8 +147,14 @@ class Tests
     }
 
     function CreateHelpFile($name, $content) {
-        $outputFile = implode("\n",$content);
-        $outputFile .= "\n";
+        if ( 0 == filesize( "$name.out" ) )
+        {
+            $outputFile = implode("\n",$content);
+        }
+        else {
+            $outputFile = implode("\n", $content);
+            $outputFile .= "\n";
+        }
         file_put_contents("$name.tmp", $outputFile);
     }
 
