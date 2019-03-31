@@ -104,8 +104,12 @@ class XML:
     def sort_arguments(instruction):
         args = []
         for i in range(len(instruction.arguments)):
-            if instruction.arguments[i][0] == "arg{0}".format(i+1):
-                args.append(instruction.arguments[i])
+            if instruction.arguments[i][0] == "arg1":
+                args.append(instruction.arguments[0])
+            elif instruction.arguments[i][0] == "arg2":
+                args.append(instruction.arguments[1])
+            elif instruction.arguments[i][0] == "arg3":
+                args.append(instruction.arguments[2])
         return args
 
     def sort(self, tmp):

@@ -109,6 +109,20 @@ def str2int_symb(func):
     return check
 
 
+def exit_op(func):
+    @wraps(func)
+    def check(**kwargs):
+        if kwargs["arg"][1] == "int":
+            if not check_int(kwargs["arg"][2]):
+                return False
+        elif kwargs["arg"][1] == "var":
+            if not check_var(kwargs["arg"][2]):
+                return False
+        return "Ok"
+
+    return check
+
+
 def arithmetic_operation_symb(func):
     @wraps(func)
     def check(**kwargs):

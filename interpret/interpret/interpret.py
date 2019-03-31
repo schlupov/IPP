@@ -18,6 +18,7 @@ from Decorators import (
     read_type,
     check_int,
     check_string,
+    exit_op
 )
 from KeyWords import KeyWords
 from Semantic import SymbolTable, checkType, checkNumberOfArguments
@@ -171,7 +172,7 @@ class InstructionBase(XML):
             ):
                 self.CheckJumpIfEq(instruction, table)
             elif instruction.opcode == KeyWords.EXIT.name:
-                self.CheckExit(instruction)
+                self.CheckExit(instruction, table)
             elif instruction.opcode == KeyWords.DPRINT.name:
                 self.CheckDPrint(instruction, table)
             elif instruction.opcode == KeyWords.BREAK.name:
@@ -300,9 +301,9 @@ class InstructionBase(XML):
             instruction.opcode, instruction.arguments, self._xml_file, table
         ).CheckOperation()
 
-    def CheckExit(self, instruction):
+    def CheckExit(self, instruction, table):
         checkNumberOfArguments(instruction.arguments, 1)
-        ExitOperation(instruction.opcode, instruction.arguments, self._xml_file).CheckOperation()
+        ExitOperation(instruction.opcode, instruction.arguments, self._xml_file, table).CheckOperation()
 
     def CheckDPrint(self, instruction, table):
         checkNumberOfArguments(instruction.arguments, 1)
@@ -357,9 +358,11 @@ class MoveOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (
-            self.AreOperandsOk(arg=self.Arguments) and self.AreOperandsTypeOk(arg=self.Arguments)
+            self.AreOperandsOk(arg=self.Arguments) or self.AreOperandsTypeOk(arg=self.Arguments)
         ):
-            exit(33)
+            exit(32)
+        if self.Arguments[1][1] == "label":
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -389,8 +392,10 @@ class PushsOperation(InstructionBase):
         return arg
 
     def CheckOperation(self):
-        if not (self.IsOperandOk(arg=self.Arguments) and self.IsOperandTypeOk(arg=self.Arguments)):
-            exit(33)
+        if not (self.IsOperandOk(arg=self.Arguments) or self.IsOperandTypeOk(arg=self.Arguments)):
+            exit(32)
+        if self.Arguments[0][1] == "label":
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         self.Execute(symbolTable)
 
@@ -422,7 +427,7 @@ class PopsOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (self.IsOperandOk(arg=self.Arguments)):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -452,7 +457,7 @@ class OperationWithNoOperands(InstructionBase):
 
     def CheckOperationAndExecute(self):
         if not self.IsOperationOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -481,7 +486,7 @@ class DefvarOperation(InstructionBase):
 
     def CheckOperationAndExecute(self):
         if not self.AreOperandsOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         self.Execute(symbolTable)
         return symbolTable
@@ -514,7 +519,7 @@ class ArithmeticOperation(InstructionBase):
             and self.AreOperandsTypeOk(arg=self.Arguments[1])
             and self.AreOperandsTypeOk(arg=self.Arguments[2])
         ):
-            exit(33)
+            exit(32)
         if not (self.Arguments[0][1] == "int" and self.Arguments[1][1] == "int"
                 or self.Arguments[0][1] == "var" and self.Arguments[1][1] == "var"):
             exit(53)
@@ -544,7 +549,7 @@ class ArithmeticOperation(InstructionBase):
             symbol.setTokenValue(op1 * op2)
         elif self.Opcode == KeyWords.IDIV.name:
             try:
-                symbol.setTokenValue(int(op1 / op2))
+                symbol.setTokenValue(int(op1 // op2))
             except ZeroDivisionError:
                 exit(57)
         return symbolTable
@@ -573,7 +578,7 @@ class RelationalOperation(InstructionBase):
             and self.AreOperandsTypeOk(arg=self.Arguments[1])
             and self.AreOperandsTypeOk(arg=self.Arguments[2])
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -663,13 +668,13 @@ class BooleanOperation(InstructionBase):
         if self.Opcode == KeyWords.NOT.name and not (
             self.AreOperandsOk(arg=self.Arguments) and self.AreOperandsTypeOk(arg=self.Arguments[1])
         ):
-            exit(33)
+            exit(32)
         elif self.Opcode != KeyWords.NOT.name and not (
             self.AreOperandsOk(arg=self.Arguments)
             and self.AreOperandsTypeOk(arg=self.Arguments[1])
             and self.AreOperandsTypeOk(arg=self.Arguments[2])
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -677,19 +682,25 @@ class BooleanOperation(InstructionBase):
     def Execute(self, symbolTable):
         symbol = symbolTable.GetVarFromSymbTable(self.Arguments)
 
-        if self.Arguments[0][1] == "var" and self.Arguments[1][1] == "var":
-            if self.Opcode != KeyWords.NOT.name:
+        if self.Opcode != KeyWords.NOT.name:
+            if self.Arguments[1][1] == "var" and self.Arguments[2][1] == "var":
                 op1 = symbolTable.GetOperandFromSymbolTable(self.Arguments[1][2])
                 op2 = symbolTable.GetOperandFromSymbolTable(self.Arguments[2][2])
-                if op1.type_of_var != "bool" or op1.type_of_var != "bool":
+                if op1.type_of_var != "bool" or op2.type_of_var != "bool":
                     exit(53)
                 op1 = op1.value
                 op2 = op2.value
-            else:
+
+        if self.Opcode == KeyWords.NOT.name:
+            if self.Arguments[1][1] == "bool":
+                op1 = self.Arguments[1][2]
+            elif self.Arguments[1][1] == "var":
                 op1 = symbolTable.GetOperandFromSymbolTable(self.Arguments[1][2])
                 if op1.type_of_var != "bool":
                     exit(53)
                 op1 = op1.value
+            else:
+                exit(53)
 
         if self.Arguments[1][1] == "bool" and self.Arguments[2][1] == "bool":
             op1 = checkType(self.Arguments[1][2])
@@ -705,9 +716,16 @@ class BooleanOperation(InstructionBase):
             else:
                 symbol.setTokenValue(op1 and op2)
         elif self.Opcode == KeyWords.OR.name:
-            symbol.setTokenValue(op1 or op2)
+            if op1 == 'false' and op2 == 'true':
+                symbol.setTokenValue('true')
+            else:
+                symbol.setTokenValue(op1 or op2)
         elif self.Opcode == KeyWords.NOT.name:
-            symbol.setTokenValue(str(not op1).lower())
+            if op1 == "true":
+                op1 = False
+            else:
+                op1 = True
+            symbol.setTokenValue(str(op1).lower())
         return symbolTable
 
 
@@ -730,7 +748,7 @@ class IntToCharOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (self.IsSymbOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -774,7 +792,7 @@ class StrToIntOperation(InstructionBase):
             and self.IsSymb1Ok(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -810,7 +828,7 @@ class ReadOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (self.IsTypeOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -825,21 +843,21 @@ class ReadOperation(InstructionBase):
 
         if self.Arguments[1][2] == "bool":
             if inputData.lower() == "true":
-                token = Token(symbol.name, "bool", "bool" + "@" + inputData)
+                token = Token(symbol.name, "bool", inputData.lower())
             else:
-                token = Token(symbol.name, "bool", "bool" + "@" + "false")
+                token = Token(symbol.name, "bool", "false")
             symbol.setTokenValue(token)
         elif self.Arguments[1][2] == "int":
             if check_int(inputData):
-                token = Token(symbol.name, "int", "int" + "@" + inputData)
+                token = Token(symbol.name, "int", inputData)
             else:
-                token = Token(symbol.name, "int", "int" + "@" + "0")
+                token = Token(symbol.name, "int", "0")
             symbol.setTokenValue(token)
         elif self.Arguments[1][2] == "string":
             if check_string(inputData):
-                token = Token(symbol.name, "string", "string" + "@" + inputData)
+                token = Token(symbol.name, "string", inputData)
             else:
-                token = Token(symbol.name, "string", "string" + "@" + "")
+                token = Token(symbol.name, "string", "")
             symbol.setTokenValue(token)
         return symbolTable
 
@@ -863,14 +881,18 @@ class WriteOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (self.IsOperandOk(arg=self.Arguments) and self.IsOperandTypeOk(arg=self.Arguments)):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         self.Execute(symbolTable)
 
     def Execute(self, symbolTable):
         if self.Arguments[0][1] == "var":
             symbol = symbolTable.GetVarFromSymbTable(self.Arguments)
-            op = symbol.__dict__["value"]
+            if symbol.type_of_var == "var":
+                op = symbolTable.GetOperandFromSymbolTable(symbol.value)
+                op = op.value
+            else:
+                op = symbol.value
         else:
             op = checkType(self.Arguments[0][2])
 
@@ -882,7 +904,10 @@ class WriteOperation(InstructionBase):
         elif isinstance(op, str):
             op = self.CheckEscape(op)
 
-        print(op, end="")
+        if op is not None:
+            print(op, end="")
+        else:
+            exit(56)
 
     @staticmethod
     def CheckEscape(s):
@@ -913,7 +938,7 @@ class ConcatOperation(InstructionBase):
             and self.IsSymbOk(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -945,7 +970,7 @@ class StrlenOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (self.IsSymbOk(arg=self.Arguments[1]) and self.IsVarOk(arg=self.Arguments)):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -960,7 +985,7 @@ class StrlenOperation(InstructionBase):
         try:
             symbol.setTokenValue(len(op))
         except TypeError:
-            exit(53)
+            exit(56)
         return symbolTable
 
 
@@ -992,7 +1017,7 @@ class GetCharOperation(InstructionBase):
             and self.IsSymb1Ok(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -1037,7 +1062,7 @@ class SetCharOperation(InstructionBase):
             and self.IsSymb1Ok(arg=self.Arguments[1])
             and self.IsVarOk(arg=self.Arguments)
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -1077,7 +1102,7 @@ class TypeOperation(InstructionBase):
 
     def CheckOperation(self):
         if not (self.IsSymbOk(arg=self.Arguments) and self.IsVarOk(arg=self.Arguments)):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         symbolTable = self.Execute(symbolTable)
         return symbolTable
@@ -1113,7 +1138,7 @@ class LabelOperation(InstructionBase):
 
     def CheckOperation(self):
         if not self.IsLabelOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
         self.Execute()
 
     def Execute(self):
@@ -1133,7 +1158,7 @@ class JumpOperation(InstructionBase):
 
     def CheckOperation(self):
         if not self.IsLabelOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
         self.Execute()
 
     def Execute(self):
@@ -1163,7 +1188,7 @@ class JumpIfEqOperation(InstructionBase):
             and self.IsSymbolTypeOk(arg=self.Arguments[1])
             and self.IsSymbolTypeOk(arg=self.Arguments[2])
         ):
-            exit(33)
+            exit(32)
         symbolTable = self.InitSymbolTable(self.table)
         self.Execute(symbolTable)
         return symbolTable
@@ -1213,7 +1238,7 @@ class ReturnOperation(InstructionBase):
 
     def CheckOperation(self):
         if not self.AreOperandsOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
         self.Execute()
 
     def Execute(self):
@@ -1252,7 +1277,7 @@ class CallOperation(InstructionBase):
 
     def CheckOperation(self):
         if not self.IsLabelOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
         self.Execute()
 
     def Execute(self):
@@ -1260,24 +1285,36 @@ class CallOperation(InstructionBase):
 
 
 class ExitOperation(InstructionBase):
-    def __init__(self, Opcode, Arguments, xml_file):
+    def __init__(self, Opcode, Arguments, xml_file, table):
         self.Opcode = Opcode
         self.Arguments = Arguments
+        self.table = table
         InstructionBase.__init__(self, xml_file)
 
     @staticmethod
-    @arithmetic_operation_symb
+    @exit_op
     def IsIntOk(arg):
         return arg
 
     def CheckOperation(self):
-        if self.Arguments[0][1] != "int":
-            exit(57)
         if not self.IsIntOk(arg=self.Arguments[0]):
-            exit(33)
+            exit(32)
 
-        if int(self.Arguments[0][2]) <= 49:
-            exit(int(self.Arguments[0][2]))
+        if self.Arguments[0][1] == "int":
+            if int(self.Arguments[0][2]) >= 0 and int(self.Arguments[0][2]) <= 49:
+                exit(int(self.Arguments[0][2]))
+            else:
+                exit(57)
+        elif self.Arguments[0][1] == "var":
+            symbolTable = self.InitSymbolTable(self.table)
+            op1 = symbolTable.GetOperandFromSymbolTable(self.Arguments[0][2])
+            exitCode = int(op1.value)
+            if exitCode >= 0 and exitCode <= 49:
+                exit(exitCode)
+            else:
+                exit(57)
+        else:
+            exit(53)
 
 
 class DPrintOperation(InstructionBase):
@@ -1294,7 +1331,7 @@ class DPrintOperation(InstructionBase):
 
     def CheckOperation(self):
         if not self.IsSymbOk(arg=self.Arguments):
-            exit(33)
+            exit(32)
 
         if self.Arguments[0][1] == "var":
             symbolTable = self.InitSymbolTable(self.table)
