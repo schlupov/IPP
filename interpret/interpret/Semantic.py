@@ -34,7 +34,7 @@ class SymbolTable:
         if symbol_table is None:
             exit(55)
         if var in symbol_table.keys():
-            exit(54)
+            exit(52)
         symbol_table[var] = symbol
         return symbol_table
 
@@ -50,6 +50,16 @@ class SymbolTable:
 
     def FindInSymbTable(self, arguments):
         frame, var = self.Frame(arguments)
+        symbolTable = self.GetFrame(frame)
+        if symbolTable is None:
+            exit(55)
+        if var in symbolTable.keys():
+            symbol = symbolTable[var]
+            return symbol
+        exit(54)
+
+    def GetOperandFromSymbolTable(self, arguments):
+        frame, var = arguments.split('@')
         symbolTable = self.GetFrame(frame)
         if symbolTable is None:
             exit(55)
