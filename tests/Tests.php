@@ -8,6 +8,8 @@ class Tests
     public $outputHtml;
     private $testName;
     private $exitCode;
+    private $diffs;
+    private $diff;
 
     function __construct($parse_only, $int_only){
         $this->parse_only = $parse_only;
@@ -18,22 +20,17 @@ class Tests
         if ((!$this->parse_only) && (!$this->int_only)){
             $xml = $this->parse_script($file->name, $parser);
             $this->CreateHelpFile($file->name,$xml);
-            $diff = $this->int_script($file->name, $interpret);
+            $this->diff = $this->int_script($file->name, $interpret);
         }
         elseif ($this->parse_only) {
             $this->parse_only($file, $file->name, $parser);
         }
         elseif ($this->int_only) {
-            $diff = $this->int_only($file->name, $interpret);
+            $this->diff = $this->int_only($file->name, $interpret);
         }
 
         if($this->parserResult == 0) {
-            if (strcmp($this->interpretResult, 'OUTDIFF') == 0)
-            {
-                $Ok=false;
-                $this->outputHtml = BuildOutputDiffBoxHtml($this->testName, $diff);
-            }
-            else if ($this->interpretResult)
+            if (($this->interpretResult) || ($this->exitCode == $this->expectedReturnCode))
             {
                 $Ok=true;
                 $this->outputHtml = BuildOkTestBoxHtml($this->testName);
@@ -50,7 +47,16 @@ class Tests
         }
         else {
             $this->expectedReturnCode = file_get_contents("$file->name.rc");
-            if ($this->exitCode != $this->expectedReturnCode) {
+            if (strcmp($this->interpretResult, 'OUTDIFF') == 0)
+            {
+                $Ok=false;
+                $this->outputHtml = BuildOutputDiffBoxHtml($this->testName, $this->diff);
+            }
+            elseif (($this->exitCode != $this->expectedReturnCode) && ($this->diffs)) {
+                $Ok = false;
+                $this->outputHtml = BuildErrTestParserBoxHtml($this->testName, $this->exitCode, $this->expectedReturnCode, $this->diffs);
+            }
+            elseif (($this->exitCode != $this->expectedReturnCode) && (!$this->diffs)) {
                 $Ok = false;
                 $this->outputHtml = BuildErrTestBoxHtml($this->testName, $this->exitCode, $this->expectedReturnCode);
             }
@@ -73,7 +79,8 @@ class Tests
         exec("php $parser <$path.src 2> /dev/null", $out, $parseReturn);
         $this->CreateHelpFile($file->name, $out);
         $this->testName = preg_replace('/^.*\//','',$path);
-        if ($parseReturn == 0) {
+        $this->expectedReturnCode = file_get_contents("$file->name.rc");
+        if (($parseReturn == 0) && ($this->expectedReturnCode == $parseReturn)){
             exec("java -jar /pub/courses/ipp/jexamxml/jexamxml.jar $path.tmp $path.out diffs.xml  /D /pub/courses/ipp/jexamxml/options", $output, $returnValue);
             if ($returnValue == 0) {
                 $this->parserResult = 1;
@@ -85,7 +92,6 @@ class Tests
             }
         }
         else {
-            $this->expectedReturnCode = file_get_contents("$file->name.rc");
             if ($this->expectedReturnCode == $parseReturn) {
                 $this->parserResult = 1;
             }
@@ -99,24 +105,37 @@ class Tests
         {
             unlink("$path.tmp");
         }
+
+        if (file_exists("diffs.xml"))
+        {
+            $this->diffs = file_get_contents("diffs.xml");
+            unlink("diffs.xml");
+        }
     }
 
     private function int_only($path, $interpret) {
+        $code = array();
         exec("python3.6 $interpret --source=$path.src < $path.in 2> /dev/null", $code, $this->parserResult);
         $this->CheckReturnCode($path);
 
         $diff=array();
-        if ($this->parserResult == 0)
+        if (($this->parserResult == 0) && ($this->expectedReturnCode == $this->parserResult))
         {
             $this->CreateHelpFile($path, $code);
-            exec("diff $path.out $path.tmp", $diff, $this->parserResult);
+            exec("diff -w $path.out $path.tmp", $diff, $this->parserResult);
             if ($this->parserResult != 0)
             {
                 $this->interpretResult = "OUTDIFF";
+                $this->parserResult = 2;
             }
         }
         else {
-            $this->exitCode = $this->parserResult;
+            if ($this->expectedReturnCode == $this->parserResult) {
+                $this->parserResult = 1;
+            }
+            else {
+                $this->exitCode = $this->parserResult;
+            }
         }
 
         if (file_exists("$path.tmp"))
@@ -136,21 +155,29 @@ class Tests
 
     private function int_script($path, $interpret) {
         $code=array();
-        exec("python3.6 $interpret --source=$path.tmp --input=read_test < $path.in 2> /dev/null", $code, $this->parserResult);
+        exec("python3.6 $interpret --source=$path.tmp < $path.in 2> /dev/null", $code, $this->parserResult);
         $this->CheckReturnCode($path);
 
         $diff=array();
-        if ($this->parserResult == 0)
+        if (($this->parserResult == 0) && ($this->expectedReturnCode == $this->parserResult))
         {
-            $inputFile = implode("\n",$code);
-            $inputFile .= "\n";
-            file_put_contents("$path.tmp", $inputFile);
+            $this->CreateHelpFile($path, $code);
             exec("diff $path.out $path.tmp", $diff, $this->parserResult);
             if ($this->parserResult != 0)
             {
                 $this->interpretResult = "OUTDIFF";
+                $this->parserResult = 2;
             }
         }
+        else {
+            if ($this->expectedReturnCode == $this->parserResult) {
+                $this->parserResult = 1;
+            }
+            else {
+                $this->exitCode = $this->parserResult;
+            }
+        }
+
         if (file_exists("$path.tmp"))
         {
             unlink("$path.tmp");
@@ -174,9 +201,13 @@ function BuildErrTestBoxHtml($name, $returned, $expected) {
     return "<div class=\"box err\"><td>$name</td><br>Ocekavany navratovy kod:  $expected <br> Navraceny kod: $returned <br> </div>";
 }
 
+function BuildErrTestParserBoxHtml($name, $returned, $expected, $diffs) {
+    return "<div class=\"box err\"><td>$name</td><br>Ocekavany navratovy kod:  $expected <br> Navraceny kod: $returned <br> Rozdil v xml:  $diffs<br></div>";
+}
+
 function BuildOutputDiffBoxHtml($name, $message) {
     $message = implode("|",$message);
-    return "<div class=\"box err\"><td>$name</td> $message</div>";
+    return "<div class=\"box err\"><td>$name<br></td> Diff: $message</div>";
 }
 
 function GenerateHead() {
@@ -192,13 +223,14 @@ function GenerateHead() {
         </style><title>Tests</title></head>";
 }
 
-function BuildResult($countOfOK,$totalCount,$detailsHTML) {
+function BuildResult($total, $countOfOK,$totalCount,$detailsHTML) {
     $headHtml = GenerateHead();
     return "<!DOCTYPE html><html>
         $headHtml
         <body><h1> IPP projekt vysledky testu</h1>
-        <h2> OK: $countOfOK FAIL: $totalCount</h2>
-        <h3>Testy</h3>
+        <h2>Celkem testu: $total </h2>
+        <h2>Dobre: $countOfOK Spatne: $totalCount</h2>
+        <h3>Spustene testy</h3>
         $detailsHTML
         </body>
         </html>";

@@ -92,7 +92,7 @@ function main() {
         }
     }
 
-    fwrite(STDOUT, BuildResult($ok,$fail,$failHTML.$successHTML));
+    fwrite(STDOUT, BuildResult($ok+$fail, $ok,$fail,$failHTML.$successHTML));
 
     exit(0);
 }
