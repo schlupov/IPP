@@ -83,13 +83,18 @@ class XML:
         instruction = None
         for i in range(len(root)):
             arguments_list = []
-            opcode = root[i].attrib["opcode"]
+            opcode = root[i].attrib["opcode"].upper()
             order = root[i].attrib["order"]
             if len(root[i].getchildren()) > 0:
                 for child in root[i].getchildren():
                     instruction = collections.namedtuple("instruction", "order opcode arguments")
                     arg_number = child.tag
                     type_of_arg = child.attrib["type"]
+                    for key in child.attrib.keys():
+                        if key != "type":
+                            exit(32)
+                    if child.attrib["type"] not in ["int", "string", "bool", "nil", "var", "label", "type"]:
+                        exit(32)
                     text = child.text
                     arguments_list.extend([(arg_number, type_of_arg, text)])
                     instruction = instruction(order=order, opcode=opcode, arguments=arguments_list)
@@ -103,17 +108,26 @@ class XML:
     @staticmethod
     def sort_arguments(instruction):
         args = []
+        args_check = []
         for i in range(len(instruction.arguments)):
             if instruction.arguments[i][0] == "arg1":
                 args.append(instruction.arguments[0])
+                args_check.append(instruction.arguments[i][0])
             elif instruction.arguments[i][0] == "arg2":
                 args.append(instruction.arguments[1])
+                args_check.append(instruction.arguments[i][0])
             elif instruction.arguments[i][0] == "arg3":
                 args.append(instruction.arguments[2])
+                args_check.append(instruction.arguments[i][0])
+            else:
+                exit(32)
+        if len(set(args_check)) != len(args):
+            exit(32)
         return args
 
     def sort(self, tmp):
         tree = []
+        order = []
         countInstructions = len(tmp)
         for i in range(countInstructions):
             for j in range(countInstructions):
@@ -121,4 +135,7 @@ class XML:
                     instruction = self.sort_arguments(tmp[j])
                     tmp[j] = tmp[j]._replace(arguments=instruction)
                     tree.append(tmp[j])
+                    order.append(tmp[j].order)
+        if len(set(order)) != len(order):
+            exit(32)
         return tree

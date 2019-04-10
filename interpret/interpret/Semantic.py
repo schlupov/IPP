@@ -83,12 +83,6 @@ class SymbolTable:
         self.TemporaryFrame = self.LocalFrame.pop()
 
 
-class DataType(Enum):
-    INT = 1,
-    BOOL = 2,
-    STRING = 3
-
-
 class Token:
 
     def __init__(self, name, type_of_var=None, value=None):
@@ -96,21 +90,18 @@ class Token:
         self.type_of_var = type_of_var
         self.value = value
 
-    def __eq__(self, other):
-        return self.name == other.name
-
     def setTokenValue(self, valueToBeSet):
         if isinstance(valueToBeSet, Token):
             self.type_of_var = valueToBeSet.type_of_var
             self.value = valueToBeSet.value
         elif isinstance(valueToBeSet, bool):
-            self.type_of_var = DataType.BOOL.name
+            self.type_of_var = "bool"
             self.value = valueToBeSet
         elif isinstance(valueToBeSet, int):
-            self.type_of_var = DataType.INT.name
+            self.type_of_var = "int"
             self.value = valueToBeSet
         elif isinstance(valueToBeSet, str):
-            self.type_of_var = DataType.STRING.name
+            self.type_of_var = "string"
             self.value = valueToBeSet
         else:
             exit(52)

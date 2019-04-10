@@ -2,46 +2,10 @@ import re
 from functools import wraps
 
 
-def move_operands(func):
-    @wraps(func)
-    def check(**kwargs):
-        if check_var(kwargs["arg"][0][2]) and (
-            check_int(kwargs["arg"][1][2])
-            or check_string(kwargs["arg"][1][2])
-            or check_bool(kwargs["arg"][1][2])
-            or check_var(kwargs["arg"][1][2])
-            or check_nil(kwargs["arg"][1][2])
-        ):
-            return "MoveOperation"
-        return False
-
-    return check
-
-
-def arithmetic_operation(func):
-    @wraps(func)
-    def check(**kwargs):
-        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
-            return "Arithmetic"
-        return False
-
-    return check
-
-
-def int2char_var(func):
-    @wraps(func)
-    def check(**kwargs):
-        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
-            return "Var"
-        return False
-
-    return check
-
-
 def var(func):
     @wraps(func)
     def check(**kwargs):
-        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]):
+        if kwargs["arg"][0][1] == "var" and check_var(kwargs["arg"][0][2]) is not None:
             return "Var"
         return False
 
@@ -51,7 +15,7 @@ def var(func):
 def label(func):
     @wraps(func)
     def check(**kwargs):
-        if kwargs["arg"][0][1] == "label" and check_label(kwargs["arg"][0][2]):
+        if kwargs["arg"][0][1] == "label" and check_label(kwargs["arg"][0][2]) is not None:
             return "Label"
         return False
 
@@ -76,60 +40,9 @@ def symb(func):
         elif kwargs["arg"][0][1] == "nil":
             if not check_nil(kwargs["arg"][0][2]):
                 return False
+        else:
+            return False
         return True
-
-    return check
-
-
-def read_type(func):
-    @wraps(func)
-    def check(**kwargs):
-        if kwargs["arg"][1] == "string":
-            if not check_string(kwargs["arg"][2]):
-                return False
-        elif kwargs["arg"][1] == "int":
-            if not check_int(kwargs["arg"][2]):
-                return False
-        elif kwargs["arg"][1] == "bool":
-            if not check_bool(kwargs["arg"][2]):
-                return False
-        return True
-
-    return check
-
-
-def str2int_symb(func):
-    @wraps(func)
-    def check(**kwargs):
-        if kwargs["arg"][1] == "string":
-            if not check_string(kwargs["arg"][2]):
-                return False
-        return "Symb"
-
-    return check
-
-
-def exit_op(func):
-    @wraps(func)
-    def check(**kwargs):
-        if kwargs["arg"][1] == "int":
-            if not check_int(kwargs["arg"][2]):
-                return False
-        elif kwargs["arg"][1] == "var":
-            if not check_var(kwargs["arg"][2]):
-                return False
-        return "Ok"
-
-    return check
-
-
-def arithmetic_operation_symb(func):
-    @wraps(func)
-    def check(**kwargs):
-        if kwargs["arg"][1] == "int":
-            if not check_int(kwargs["arg"][2]):
-                return False
-        return "Symb"
 
     return check
 
@@ -146,33 +59,76 @@ def relational_operation_symb(func):
         elif kwargs["arg"][1] == "bool":
             if not check_bool(kwargs["arg"][2]):
                 return False
+        elif kwargs["arg"][1] == "nil":
+            if not check_nil(kwargs["arg"][2]):
+                return False
+        elif kwargs["arg"][1] == "var":
+            if not check_var(kwargs["arg"][2]):
+                return False
+        else:
+            return False
         return "Symb"
 
     return check
 
 
-def symb_types(func):
+def read_type(func):
     @wraps(func)
     def check(**kwargs):
-        if kwargs["arg"][0][1] == "var":
-            if not check_var(kwargs["arg"][0][2]):
+        if kwargs["arg"][1] == "type":
+            if not check_type(kwargs["arg"][2]):
                 return False
-        elif kwargs["arg"][0][1] == "string":
-            if not check_string(kwargs["arg"][0][2]):
+        else:
+            return False
+        return "Type"
+
+    return check
+
+
+def str2int_symb(func):
+    @wraps(func)
+    def check(**kwargs):
+        if kwargs["arg"][1] == "string":
+            if not check_string(kwargs["arg"][2]):
                 return False
-        elif kwargs["arg"][0][1] == "int":
-            if not check_int(kwargs["arg"][0][2]):
+        elif kwargs["arg"][1] == "var":
+            if not check_var(kwargs["arg"][2]):
                 return False
-        elif kwargs["arg"][0][1] == "bool":
-            if not check_bool(kwargs["arg"][0][2]):
+        else:
+            return False
+        return "Symb"
+
+    return check
+
+
+def arithmetic_operation_symb(func):
+    @wraps(func)
+    def check(**kwargs):
+        if kwargs["arg"][1] == "var":
+            if not check_var(kwargs["arg"][2]):
                 return False
-        elif kwargs["arg"][0][1] == "nil":
-            if not check_nil(kwargs["arg"][0][2]):
+        elif kwargs["arg"][1] == "int":
+            if not check_int(kwargs["arg"][2]):
                 return False
-        elif kwargs["arg"][0][1] == "var":
-            if not check_var(kwargs["arg"][0][2]):
+        else:
+            return False
+        return "int"
+
+    return check
+
+
+def boolean_operation_symb(func):
+    @wraps(func)
+    def check(**kwargs):
+        if kwargs["arg"][1] == "var":
+            if not check_var(kwargs["arg"][2]):
                 return False
-        return True
+        elif kwargs["arg"][1] == "bool":
+            if not check_bool(kwargs["arg"][2]):
+                return False
+        else:
+            return False
+        return "bool"
 
     return check
 
@@ -200,17 +156,9 @@ def move_types(func):
             elif kwargs["arg"][i][1] == "var":
                 if not check_var(kwargs["arg"][i][2]):
                     return False
+            else:
+                return False
         return True
-
-    return check
-
-
-def no_operands(func):
-    @wraps(func)
-    def check(**kwargs):
-        if len(kwargs["arg"]) == 0:
-            return "OperationWithNoOperands"
-        return False
 
     return check
 
@@ -232,9 +180,12 @@ def check_label(label):
 
 
 def check_var(var):
-    return re.match(r"^(GF|LF|TF)@([a-zA-Z]|-|[_$&%*])([a-zA-Z]|-|[_$&%*]|[0-9]+)+$", var)
+    return re.match(r"^(GF|LF|TF)@([a-zA-Z]|[_\-$&%*])*([a-zA-Z]|[_\-$&%*]|[0-9])$", var)
 
 
 def check_nil(nil):
     return re.match("nil", nil)
 
+
+def check_type(type_op):
+    return re.match("(int|string|bool)", type_op)
